@@ -1,0 +1,32 @@
+apiVersion: "apps/v1beta1"
+kind: Deployment
+metadata:
+   name: myapp
+   labels :
+     name : web-app
+     app: py-app
+spec:
+  selector: 
+    matchLabels:
+      app: py-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: py-app
+    spec:	
+      containers:
+      - image: shubhamsk7/py-app
+        name: py-app
+        ports:
+        - containerPort: 5000
+          name: mycont
+      - name: mysql
+        image: mysql:latest
+        ports:
+        - containerPort: 3306         
+          protocol: TCP
+        env: 
+         - 
+          name: "MYSQL_ROOT_PASSWORD"
+          value: "root"

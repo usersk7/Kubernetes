@@ -1,0 +1,416 @@
+Ticket Number for WIFI connection -> Request ID : 19615
+
+Akash Bandyopadhyay [8:16 AM]
+PDF 
+Lab Handout.pdf
+1 MB PDF
+Zip 
+TO SEND.zip
+46 kB Zip
+Please download the .zip file and the PDF :slightly_smiling_face:
+
+Akash Bandyopadhyay [8:49 AM]
+People downloaded the above PDF & zip?
+
+suneha.rawat [8:53 AM]
+yes
+
+minal.chimankar [8:56 AM]
+yes
+
+Akash Bandyopadhyay [9:01 AM]
+@here: Connect to lab VM... After this portion, it will mostly be hands-on sort of.
+*VMs
+
+aarti.karve [9:01 AM]
+sure
+
+kulesh.deshmukh [9:09 AM]
+echo "100000000" > /sys/fs/cgroup/memory/demo/memory.limit_in_bytes
+echo "0" > /sys/fs/cgroup/memory/demo/memory.swappiness
+
+Akash Bandyopadhyay [9:12 AM]
+@here: Upload the content of "TO SEND.zip" to the 1st VM allocated to group. It contains a few kubernetes setup and hands-on related files.
+
+Bhushan Rane [9:13 AM]
+sudo su -
+
+kulesh.deshmukh [9:14 AM]
+----
+f = open("/dev/urandom", "r")
+data = ""
+print "**********************************************************"
+print " Below program shows the use of memory cGroup sub system**"
+print "**********************************************************"
+i=0
+while True:
+   data += f.read(10000000) # 10mb
+   i += 1
+   print "%d MB of memory is utilized" % (i*10,)
+
+vrushal.patankar [9:23 AM]
+comment first line
+and
+import codecs
+with codecs.open("/dev/urandom", "r",encoding='utf-8', errors='ignore') as f:
+then try again
+did this worked ?
+
+Vishal Bayskar [9:25 AM]
+working for me
+
+vrushal.patankar [9:25 AM]
+cool (edited)
+
+Bhushan Rane [9:26 AM]
+share working code
+
+vrushal.patankar [9:26 AM]
+my MB value is diff
+just update it accordingly
+import codecs
+with codecs.open("/dev/urandom", "r",encoding='utf-8', errors='ignore') as f:
+#f = open("/dev/urandom", "r")
+ data = ""
+ print ("**********************************************************")
+ print (" Below program shows the use of memory cGroup sub system**")
+ print ("**********************************************************")
+ i=0
+ while True:
+    data += f.read(1000000) # 10mb
+    i += 1
+    print ("%d MB of memory is utilized" % (i*10,))
+
+Vishal Bayskar [9:26 AM]
+#f = open("/dev/urandom", encoding='ISO-8859-1')
+import codecs
+with codecs.open("/dev/urandom", "r",encoding='utf-8', errors='ignore') as f:
+
+       data = ""
+       print (" Below program shows the use of memory cGroup sub system**")
+       i=0
+       while True:
+          data += f.read(10000000) # 10mb
+          i += 1
+          print ("%d MB of memory is utilized" % (i*10,))
+~
+
+kulesh.deshmukh [9:33 AM]
+wget https://github.com/ericchiang/containers-from-scratch/releases/download/v0.1.0/rootfs.tar.gz
+sha256sum rootfs.tar.gz
+sudo tar -zxf rootfs.tar.gz
+
+Vishal Bayskar [9:41 AM]
+sudo chroot rootfs /bin/bash
+
+kulesh.deshmukh [9:59 AM]
+sudo unshare -p -f --mount-proc=$PWD/rootfs/proc chroot rootfs /bin/bash
+
+Akash Bandyopadhyay [10:07 AM]
+Break of 15-20 mins(tea/breakfast) post this?
+
+kulesh.deshmukh [10:39 AM]
+PowerPoint Presentation 
+C Groups and Name Space.pptx
+609 kB PowerPoint Presentation
+PPT for namespace and C group shared above
+
+Vishal Bayskar [10:44 AM]
+Link can be referred for more detail on container creation https://ericchiang.github.io/post/containers-from-scratch/
+
+kulesh.deshmukh [10:45 AM]
+yes please refer to above
+its helpful
+
+vrushal.patankar [10:49 AM]
+https://success.docker.com/article/introduction-to-user-namespaces-in-docker-engine
+
+sadhana.sonawa [10:58 AM]
+docker pull python:3.6-alpine
+
+Akash Bandyopadhyay [11:44 AM]
+nsenter --target $PID --mount --uts --ipc --net --pid /bin/sh (edited)
+
+kulesh.deshmukh [11:47 AM]
+nsenter --target 1859 --mount --uts --ipc --net --pid /bin/sh # ---> command to login to container insted of docker exec. THis is kernel implementation for system call.
+
+Vishal Bayskar [11:47 AM]
+nsenter - run program with namespaces of other processes
+From <http://man7.org/linux/man-pages/man1/nsenter.1.html>
+
+Bhushan Rane [12:01 PM]
+This file has almost all docker command executed and output.. please refer this for rest of docker commands..
+Docker_commands.txt 
+2. Installation - Ubuntu
+_________________________
+$ sudo apt-get update
+$ sudo apt-get install curl
+
+Deepak [12:38 PM]
+https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/#understanding-pods
+kubernetes.io
+Pod Overview
+https://kubernetes.io/images/kubernetes-horizontal-color.png
+
+vrushal.patankar [12:39 PM]
+and
+https://www.mirantis.com/blog/multi-container-pods-and-container-communication-in-kubernetes/
+Mirantis | Pure Play Open Cloud
+Multi-container pods and container communication in Kubernetes
+In the real world, problems require multiple containers for a complete solution.
+Aug 28th, 2017
+https://www.mirantis.com/wp-content/uploads/2017/08/MultiContainerPods.png
+abov two links are on points:
+Why pods concept.. why not kubernetes handled dockers directly
+second .. discussion on one container one pod... or multiple containers in one pod
+
+Akash Bandyopadhyay [12:41 PM]
+Kubeadm installation:
+
+On VM1: •    kubeadm init --pod-network-cidr=192.180.0.0/16 --apiserver-advertise-address= <IP-Address-of-VM1>
+
+kulesh.deshmukh [12:46 PM]
+following is example to run on another vms apart from master node
+kubeadm join <Master IP:Port> --token tmsbkj.l0c0l5yn6e4135rn --discovery-token-ca-cert-hash sha256:7e98ee02668561b2f2d60af94fd6e44ef3d9a6f34e2e5b81b9c5c469c4900787
+this is example
+
+Akash Bandyopadhyay [12:49 PM]
+export KUBECONFIG=/etc/kubernetes/admin.conf
+
+kulesh.deshmukh [12:50 PM]
+root@KubeGroup81:/home/ubuntu# export KUBECONFIG=/etc/kubernetes/admin.conf
+root@KubeGroup81:/home/ubuntu# kubectl get nodes
+NAME          STATUS     ROLES    AGE     VERSION
+kubegroup81   NotReady   master   7m29s   v1.12.1
+kubegroup82   NotReady   <none>   6m30s   v1.12.1
+kubegroup83   NotReady   <none>   6m12s   v1.12.1
+
+Akash Bandyopadhyay [12:51 PM]
+---
+
+Upload the yaml files from "TO SEND.zip" to master
+kubectl apply -f ./calico.yaml
+kubectl apply -f ./rbac-kdd.yaml
+
+Akash Bandyopadhyay [1:45 PM]
+Zip 
+TO SEND - U.zip
+52 kB Zip
+Upload the content to EVERY NODE
+
+Akash Bandyopadhyay [1:59 PM]
+docker build -t akashgslab/primary_app:demo ./
+
+kulesh.deshmukh [2:01 PM]
+akashgslab: this is akash id
+yous your own id for docker hub
+--
+root@KubeGroup81:/home/ubuntu/Docker/Images/PA# docker login
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: kuleshdeshmukh
+Password:
+WARNING! Your password will be stored unencrypted in /root/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+root@KubeGroup81:/home/ubuntu/Docker/Images/PA# ls
+Dockerfile  primary_app  requirements.txt
+root@KubeGroup81:/home/ubuntu/Docker/Images/PA#
+Docker Documentation
+docker login
+Description Log in to a Docker registry Usage docker login [OPTIONS] [SERVER] Options Name, shorthand Default Description --password , -p Password --password-stdin Take the password from stdin --username , -u...
+Oct 26th
+---
+Dockerfile  primary_app  requirements.txt
+root@KubeGroup81:/home/ubuntu/Docker/Images/PA# docker push kuleshdeshmukh/primary_app:demo
+The push refers to repository [docker.io/kuleshdeshmukh/primary_app]
+7ec26eda800a: Pushed
+f5eb4ca6201a: Pushed
+b99f98c02d51: Pushed
+c45e1b95ab54: Pushed (edited)
+
+Vishal Bayskar [3:18 PM]
+@here somebody forgot laptop in conf room bhaskara
+GS-1770
+
+Aditya Mishal [8:45 PM]
+Will not join tomorrow due to urgency...
+
+Vishal Bayskar [8:03 AM]
+We are in chandrayan
+2nd floor
+
+Bhushan Rane [8:03 AM]
+@here Bhaskara has some work going on
+lets do from Chandrayan today
+
+Vishal Bayskar [8:08 AM]
+@here  please bring WiFi device if you have one.
+Office WiFi started ... We are going to start in next 2 mins please join in Chandrayan 2nd floor
+
+Akash Bandyopadhyay [8:17 AM]
+Zip 
+HO6-Service.zip
+Zip
+
+Deepak [8:43 AM]
+https://pracucci.com/graceful-shutdown-of-kubernetes-pods.html
+pracucci.com
+Graceful shutdown of pods with Kubernetes
+How to get a graceful shutdow of pods orchestrated with Kubernetes.
+Graceful shutdow
+
+Deepak [9:00 AM]
+export KUBECONFIG=/etc/kubernetes/admin.conf
+
+vrushal.patankar [9:00 AM]
+put this in .bashrc
+
+kulesh.deshmukh [9:05 AM]
+-----
+root@KubeGroup81:/home/ubuntu/K8S/HO4# kubectl delete pod primary-app-deploy-with-replica-7b6479d6cc-2hzqr &
+[1] 11681
+root@KubeGroup81:/home/ubuntu/K8S/HO4# pod "primary-app-deploy-with-replica-7b6479d6cc-2hzqr" deleted
+kubectl delete pod primary-app-deploy-w
+root@KubeGroup81:/home/ubuntu/K8S/HO4#
+root@KubeGroup81:/home/ubuntu/K8S/HO4#
+root@KubeGroup81:/home/ubuntu/K8S/HO4#
+root@KubeGroup81:/home/ubuntu/K8S/HO4# kubectl get pods
+NAME                                               READY   STATUS        RESTARTS   AGE
+primary-app-deploy-with-replica-7b6479d6cc-2hzqr   1/1     Terminating   0          6m32s
+primary-app-deploy-with-replica-7b6479d6cc-4f6vr   1/1     Running       0          16s
+primary-app-deploy-with-replica-7b6479d6cc-l65sx   1/1     Running       0          6m32s
+primary-app-deploy-with-replica-7b6479d6cc-n7brj   1/1     Running       0          6m32s
+primary-app-deploy-with-replica-7b6479d6cc-qhc2t   1/1     Running       0          6m32s
+sample-pod-1                                       1/1     Running       0          18h
+sample-pod-2                                       1/1     Running       0          18h
+root@KubeGroup81:/home/ubuntu/K8S/HO4# kubectl get deploy
+NAME                              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+primary-app-deploy-with-replica   4         4         4            4           6m52s
+root@KubeGroup81:/home/ubuntu/K8S/HO4# kubectl get pods
+NAME                                               READY   STATUS    RESTARTS   AGE
+primary-app-deploy-with-replica-7b6479d6cc-4f6vr   1/1     Running   0          44s
+primary-app-deploy-with-replica-7b6479d6cc-l65sx   1/1     Running   0          7m
+primary-app-deploy-with-replica-7b6479d6cc-n7brj   1/1     Running   0          7m
+primary-app-deploy-with-replica-7b6479d6cc-qhc2t   1/1     Running   0          7m
+sample-pod-1                                       1/1     Running   0          18h
+sample-pod-2                                       1/1     Running   0          18h
+[1]+  Done                    kubectl delete pod primary-app-deploy-with-replica-7b6479d6cc-2hzqr
+root@KubeGroup81:/home/ubuntu/K8S/HO4#
+
+volume example
+PDF 
+volumes kuberetes.pdf
+124 kB PDF
+
+Deepak [11:00 AM]
+https://kubernetes.io/docs/concepts/storage/volumes/
+kubernetes.io
+Volumes
+https://kubernetes.io/images/kubernetes-horizontal-color.png
+
+vrushal.patankar [11:02 AM]
+root@kubegroup43:~# ls -al /var/lib/kubelet/pods/b4de28f3-da67-11e8-beb6-0050568f3ca3/volumes/kubernetes.io~secret/foo
+total 4
+drwxrwxrwt 3 root root  100 Oct 28 09:42 .
+drwxr-xr-x 4 root root 4096 Oct 28 09:42 ..
+drwxr-xr-x 2 root root   60 Oct 28 09:42 ..2018_10_28_04_12_38.560855720
+lrwxrwxrwx 1 root root   31 Oct 28 09:42 ..data -> ..2018_10_28_04_12_38.560855720
+lrwxrwxrwx 1 root root   16 Oct 28 09:42 user_pass -> ..data/user_pass
+root@kubegroup43:~#
+after deleting pod.. now
+root@kubegroup43:~# ls -al /var/lib/kubelet/pods/b4de28f3-da67-11e8-beb6-0050568f3ca3/volumes/kubernetes.io~secret/foo
+ls: cannot access '/var/lib/kubelet/pods/b4de28f3-da67-11e8-beb6-0050568f3ca3/volumes/kubernetes.io~secret/foo': No such file or directory
+root@kubegroup43:~#
+
+Deepak [11:21 AM]
+kubectl get pods --all-namespaces
+
+vrushal.patankar [11:30 AM]
+https://github.com/kubernetes-incubator/external-dns
+GitHub
+kubernetes-incubator/external-dns
+Configure external DNS servers (AWS Route53, Google CloudDNS and others) for Kubernetes Ingresses and Services - kubernetes-incubator/external-dns
+
+Akash Bandyopadhyay [11:34 AM]
+https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-when-should-i-use-what-922f010849e0
+Medium
+Kubernetes NodePort vs LoadBalancer vs Ingress? When should I use what?
+Recently, someone asked me what the difference between NodePorts, LoadBalancers, and Ingress were. They are all different ways to get…
+Reading time
+5 min read
+Mar 12th
+https://cdn-images-1.medium.com/max/1200/1*KIVa4hUVZxg-8Ncabo8pdg.png
+
+vrushal.patankar [11:39 AM]
+https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/
+kubernetes.io
+Create an External Load Balancer
+https://kubernetes.io/images/kubernetes-horizontal-color.png
+
+suyeb.ansari [11:51 AM]
+IMG-20181028-WA0016.jpg 
+
+
+Bhushan Rane [11:52 AM]
+Pasted image at 2018-10-28, 11:52 AM 
+
+Pasted image at 2018-10-28, 11:53 AM 
+
+Pasted image at 2018-10-28, 11:55 AM 
+
+Pasted image at 2018-10-28, 11:58 AM 
+
+
+vrushal.patankar [12:11 PM]
+too many links :slightly_smiling_face: heres one more
+https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-when-should-i-use-what-922f010849e0
+Medium
+Kubernetes NodePort vs LoadBalancer vs Ingress? When should I use what?
+Recently, someone asked me what the difference between NodePorts, LoadBalancers, and Ingress were. They are all different ways to get…
+Reading time
+5 min read
+Mar 12th
+https://cdn-images-1.medium.com/max/1200/1*KIVa4hUVZxg-8Ncabo8pdg.png
+it has brief info on all nodeport.. service.. loadbalancer and ingress...
+ooops Akash just showing same link.. sorry
+
+Akash Bandyopadhyay [12:16 PM]
+https://kubernetes.io/docs/concepts/services-networking/network-policies/
+kubernetes.io
+Network Policies
+https://kubernetes.io/images/kubernetes-horizontal-color.png
+
+Akash Bandyopadhyay [1:45 PM]
+https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+kubernetes.io
+Pod Priority and Preemption
+https://kubernetes.io/images/kubernetes-horizontal-color.png
+https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/#writing-a-job-spec
+kubernetes.io
+Jobs - Run to Completion
+https://kubernetes.io/images/kubernetes-horizontal-color.png
+
+Akash Bandyopadhyay [1:52 PM]
+kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+kubectl edit svc kubernetes-dashboard -n kube-system
+
+Akash Bandyopadhyay [2:15 PM]
+Hiiii
+
+vrushal.patankar [2:22 PM]
+Hi AKash :stuck_out_tongue:
+
+Deepak [2:22 PM]
+Thanks you Akash Sir for the informative session :slightly_smiling_face:
+
+Akash Bandyopadhyay [4:01 PM]
+Thanks
+PowerPoint Presentation 
+Docker-Kubernetes Presentation.pptx
+1 MB PowerPoint Presentation
+
+PowerPoint Presentation 
+Lab Handout - Day 2.pptx
+728 kB PowerPoint Presentation

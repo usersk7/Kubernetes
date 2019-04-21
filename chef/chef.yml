@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chef
+  labels:
+    app: chef-server
+spec:
+  selector:
+    matchLabels:
+      app: chef # has to match .spec.template.metadata.labels
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: chef # has to match .spec.selector.matchLabels
+    spec:
+      containers:
+      - image: shubhamsk7/chefserver
+        name: chef-server
+        ports:
+        - name: chef-port
+          containerPort: 5672 

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq2
+  labels:
+    app: rabbit
+spec:
+  selector:
+    matchLabels:
+      app: rabbitmq2 # has to match .spec.template.metadata.labels
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rabbitmq2 # has to match .spec.selector.matchLabels
+    spec:
+      containers:
+      - image: rabbitmq:3.6.6-management-alpine #rabbitmq:3.7-alpine
+        name: rabbit
+        ports:
+        - name: rabbit-port
+          containerPort: 5672 

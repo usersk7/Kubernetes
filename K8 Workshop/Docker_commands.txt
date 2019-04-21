@@ -1,0 +1,882 @@
+2.  Installation - Ubuntu
+_________________________
+
+$ sudo apt-get update
+$ sudo apt-get install curl
+$ curl -fsSL https://get.docker.com/ | sh
+
+Verification
+_________________________
+
+sudo docker run hello-world
+
+Output:
+_______
+
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+c04b14da8d14: Pull complete 
+Digest: sha256:0256e8a36e2070f7bf2d0b0763dbabdd67798512411de4cdcf9431a1feb60fd9
+Status: Downloaded newer image for hello-world:latest
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker Hub account:
+ https://hub.docker.com
+
+For more examples and ideas, visit:
+ https://docs.docker.com/engine/userguide/
+
+
+3 and 4. Dockerfile to install and run webserver and deploy the server using docker
+___________________________________________
+
+mkdir mydocker
+vim dockerfile :
+   FROM ubuntu:14.04
+   RUN sudo apt-get -y update
+   RUN apt-get -y install apache2
+   RUN sudo service apache2 start
+   
+docker build -t web-server .
+
+Output:
+_______   
+Sending build context to Docker daemon 9.216 kB
+Step 1 : FROM ubuntu:14.04
+14.04: Pulling from library/ubuntu
+ba76e97bb96c: Pull complete 
+4d6181e6b423: Pull complete 
+4854897be9ac: Pull complete 
+4458f3097eef: Pull complete 
+9989a8de1a9e: Pull complete 
+Digest: sha256:062bba17f92e749bd3092e7569aa06c6773ade7df603958026f2f5397431754c
+Status: Downloaded newer image for ubuntu:14.04
+ ---> 4d44acee901c
+Step 2 : RUN sudo apt-get -y update
+ ---> Running in d8f85f2b4fe3
+Ign http://archive.ubuntu.com trusty InRelease
+Get:1 http://archive.ubuntu.com trusty-updates InRelease [65.9 kB]
+Get:2 http://archive.ubuntu.com trusty-security InRelease [65.9 kB] .....
+
+docker images  ---
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+web-server          latest              87112ce30594        5 minutes ago       224.6 MB
+ubuntu              14.04               4d44acee901c        12 days ago         187.9 MB
+hello-world         latest              c54a2cc56cbb        5 months ago        1.848 kB
+
+docker run -p 8080:80 web-server
+
+6. Export image to docker public repo
+______________________________________
+
+docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+web-server          latest              87112ce30594        3 hours ago         224.6 MB
+ubuntu              14.04               4d44acee901c        12 days ago         187.9 MB
+hello-world         latest              c54a2cc56cbb        5 months ago        1.848 kB
+
+docker tag 87112ce30594 suneha/web-server:latest
+docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+web-server          latest              87112ce30594        3 hours ago         224.6 MB
+suneha/web-server   latest              87112ce30594        3 hours ago         224.6 MB
+ubuntu              14.04               4d44acee901c        12 days ago         187.9 MB
+hello-world         latest              c54a2cc56cbb        5 months ago        1.848 kB
+
+docker login
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: suneha
+Password: 
+Login Succeeded
+
+docker push suneha/web-server
+The push refers to a repository [docker.io/suneha/web-server]
+70c58c8b0ce6: Pushed 
+02ddf7c32248: Pushed 
+8ef9807dd390: Pushed 
+814604a03e94: Mounted from library/ubuntu 
+e24c95bed650: Mounted from library/ubuntu 
+b6aa0652e325: Mounted from library/ubuntu 
+b290ed9f4e14: Mounted from library/ubuntu 
+b257bb4b4aea: Mounted from library/ubuntu 
+latest: digest: sha256:a7374c95d7088d34325f67c771b8f64754af77cef895b08ab81e4340170d8433 size: 1989
+
+7. Install your image on other docker VM from docker public repo
+________________________________________________________________
+
+docker run suneha/docker-wh
+
+Output:
+Unable to find image 'suneha/docker-wh:latest' locally
+latest: Pulling from suneha/docker-wh
+e190868d63f8: Pull complete 
+909cd34c6fd7: Pull complete 
+0b9bfabab7c1: Pull complete 
+a3ed95caeb02: Pull complete 
+00bf65475aba: Pull complete 
+c57b6bcc83e3: Pull complete 
+8978f6879e2f: Pull complete 
+8eed3712d2cf: Pull complete 
+bc31fe5830e9: Pull complete 
+Digest: sha256:b0a467da82d53ef381a2ee71375a8fe761ee8d51ba3465a181b01d0abd40fd2f
+Status: Downloaded newer image for suneha/docker-wh:latest
+ _______________________________________ 
+/ Historians have now definitely        \
+| established that Juan Cabrillo,       |
+| discoverer of California, was not     |
+| looking for Kansas, thus setting a    |
+| precedent that continues to this day. |
+|                                       |
+\ -- Wayne Shannon                      /
+ --------------------------------------- 
+    \
+     \
+      \     
+                    ##        .            
+              ## ## ##       ==            
+           ## ## ## ##      ===            
+       /""""""""""""""""___/ ===        
+  ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+       \______ o          __/            
+        \    \        __/             
+          \____\______/   
+
+
+docker images
+REPOSITORY           TAG                 IMAGE ID            CREATED             SIZE
+suneha/web-server    latest              87112ce30594        4 hours ago         224.6 MB
+web-server           latest              87112ce30594        4 hours ago         224.6 MB
+suneha/docker-wh     latest              029559db1dc4        6 days ago          275 MB
+ubuntu               latest              e4415b714b62        12 days ago         128.1 MB
+ubuntu               14.04               4d44acee901c        12 days ago         187.9 MB
+hello-world          latest              c54a2cc56cbb        5 months ago        1.848 kB
+suneha/hello-world   latest              c54a2cc56cbb        5 months ago        1.848 kB
+
+
+5.  Basic commands
+___________________
+
+
+
+Docker RUN command:
+___________________
+
+docker run -ti ubuntu /bin/bash
+
+Output:
+Unable to find image 'ubuntu:latest' locally
+latest: Pulling from library/ubuntu
+aed15891ba52: Pull complete 
+773ae8583d14: Pull complete 
+d1d48771f782: Pull complete 
+cd3d6cd6c0cf: Pull complete 
+8ff6f8a9120c: Pull complete 
+Digest: sha256:35bc48a1ca97c3971611dc4662d08d131869daa692acb281c7e9e052924e38b1
+Status: Downloaded newer image for ubuntu:latest
+root@a3d2b3cbad3c:/# apt-get -y update  
+Get:1 http://archive.ubuntu.com/ubuntu xenial InRelease [247 kB]
+Get:2 http://archive.ubuntu.com/ubuntu xenial-updates InRelease [102 kB]
+Get:3 http://archive.ubuntu.com/ubuntu xenial-security InRelease [102 kB] .....
+
+docker ps :
+___________
+docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                         PORTS               NAMES
+d1d5493a6ff3        fedora              "bash"                   2 minutes ago       Created                                            angry_babbage
+7bf42cb6110d        suneha/docker-wh    "/bin/sh -c '/usr/gam"   20 minutes ago      Exited (0) 20 minutes ago                          agitated_bose
+ad4f44160a5c        ubuntu:14.04        "/bin/bash"              54 minutes ago      Exited (0) 48 minutes ago                          WebServer
+c99343bad5b9        ubuntu:14.04        "/bin/bash"              About an hour ago   Exited (0) About an hour ago                       Web_Server
+90aa48c42d65        web-server          "/bin/bash"              About an hour ago   Exited (0) About an hour ago                       sad_mahavira
+31b563c91f0a        web-server          "/bin/bash"              About an hour ago   Exited (0) About an hour ago                       happy_poitras
+771c4ef37eab        web-server          "/bin/bash"              About an hour ago   Exited (0) About an hour ago                       agitated_pasteur
+a3d2b3cbad3c        ubuntu              "/bin/bash"              About an hour ago   Exited (0) About an hour ago                       amazing_ptolemy
+360de872550b        web-server          "/bin/bash"              4 hours ago         Exited (0) 4 hours ago                             suspicious_swartz
+494c0ab83101        web-server          "/bin/bash"              4 hours ago         Exited (0) 4 hours ago                             pedantic_jones
+f07d7e60d60e        hello-world         "/hello"                 5 hours ago         Exited (0) 5 hours ago                             grave_goldwasser
+
+docker commit :
+_______________
+docker commit 7bf42cb6110d suneha/docker-wh:demo
+sha256:95a570865e88fc3538ec7deb7f98f26b2879a6b8a556e55924f7a130154346b0
+
+docker images :
+_______________
+docker images
+REPOSITORY           TAG                 IMAGE ID            CREATED             SIZE
+suneha/docker-wh     demo                95a570865e88        18 seconds ago      275 MB
+suneha/web-server    latest              87112ce30594        4 hours ago         224.6 MB
+web-server           latest              87112ce30594        4 hours ago         224.6 MB
+fedora               latest              5bafccc4d5dc        6 days ago          199.9 MB
+suneha/docker-wh     latest              029559db1dc4        7 days ago          275 MB ...
+
+docker history :
+________________
+docker history suneha/web-server
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+87112ce30594        5 hours ago         /bin/sh -c sudo service apache2 start           157 B               
+ffeb202edf86        5 hours ago         /bin/sh -c apt-get -y install apache2           14.36 MB            
+ab3085d6e744        5 hours ago         /bin/sh -c sudo apt-get -y update               22.29 MB            
+4d44acee901c        12 days ago         /bin/sh -c #(nop)  CMD ["/bin/bash"]            0 B                 
+<missing>           12 days ago         /bin/sh -c mkdir -p /run/systemd && echo 'doc   7 B                 
+<missing>           12 days ago         /bin/sh -c sed -i 's/^#\s*\(deb.*universe\)$/   1.895 kB            
+<missing>           12 days ago         /bin/sh -c rm -rf /var/lib/apt/lists/*          0 B                 
+<missing>           12 days ago         /bin/sh -c set -xe   && echo '#!/bin/sh' > /u   194.6 kB            
+<missing>           12 days ago         /bin/sh -c #(nop) ADD file:79ae73b5e33a497a33   187.8 MB  
+
+docker export:
+______________
+docker export WebServer | gzip > WebServer.tar.gz
+
+root@docker:~# ls
+amazing_ptolemy.tar.gz  dockerfile  mydocker  myfile.txt  ubuntu-web.tar.gz  WebServer.tar.gz
+
+docker import :
+______________
+docker import /root/ubuntu-web.tar.gz
+sha256:b4b28e47d89f02544c8c6506439f2f3963d863d1949e79ea765fb23c3f28196d
+
+docker info :
+_____________
+
+docker info 
+Containers: 12
+ Running: 0
+ Paused: 0
+ Stopped: 12
+Images: 12
+Server Version: 1.12.3
+Storage Driver: aufs
+ Root Dir: /var/lib/docker/aufs
+ Backing Filesystem: extfs
+ Dirs: 51
+ Dirperm1 Supported: false
+Logging Driver: json-file
+Cgroup Driver: cgroupfs
+Plugins:
+ Volume: local
+ Network: host null bridge overlay
+Swarm: inactive
+Runtimes: runc
+Default Runtime: runc
+Security Options: apparmor
+Kernel Version: 3.13.0-24-generic
+Operating System: Ubuntu 14.04 LTS
+OSType: linux
+Architecture: x86_64
+CPUs: 1
+Total Memory: 994 MiB
+Name: docker.gslab.com
+ID: H6U4:V7GB:WVL6:2Y4Y:EVHG:I476:O2AH:6ER5:LF6F:SKMD:LHOD:IIAK
+Docker Root Dir: /var/lib/docker
+Debug Mode (client): false
+Debug Mode (server): false
+Username: suneha
+Registry: https://index.docker.io/v1/
+WARNING: No swap limit support
+WARNING: No kernel memory limit support
+Insecure Registries:
+ 127.0.0.0/8
+
+docker inspect :
+________________ 
+docker inspect WebServer 
+[
+    {
+        "Id": "ad4f44160a5cd53066b60edf18b50c0ff09d6c7d999f5b2138371cc08d9d3f31",
+        "Created": "2016-11-29T08:51:30.39433203Z",
+        "Path": "/bin/bash",
+        "Args": [],
+        "State": {
+            "Status": "exited",
+            "Running": false,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 0,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2016-11-29T08:51:33.899808021Z",
+            "FinishedAt": "2016-11-29T08:58:04.783274718Z"
+        },
+        "Image": "sha256:4d44acee901c27c707bce645738b25616ea821bcfcedb7fd25e0a4c7e42297a4",
+        "ResolvConfPath": "/var/lib/docker/containers/ad4f44160a5cd53066b60edf18b50c0ff09d6c7d999f5b2138371cc08d9d3f31/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/ad4f44160a5cd53066b60edf18b50c0ff09d6c7d999f5b2138371cc08d9d3f31/hostname",
+        "HostsPath": "/var/lib/docker/containers/ad4f44160a5cd53066b60edf18b50c0ff09d6c7d999f5b2138371cc08d9d3f31/hosts",
+        "LogPath": "/var/lib/docker/containers/ad4f44160a5cd53066b60edf18b50c0ff09d6c7d999f5b2138371cc08d9d3f31/ad4f44160a5cd53066b60edf18b50c0ff09d6c7d999f5b2138371cc08d9d3f31-json.log",
+        "Name": "/WebServer",
+        "RestartCount": 0,
+        "Driver": "aufs",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "default",
+            "PortBindings": {
+                "80/tcp": [
+                    {
+                        "HostIp": "",
+                        "HostPort": "8080"
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "CapAdd": null,
+            "CapDrop": null,
+            "Dns": [],
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": null,
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DiskQuota": 0,
+            "KernelMemory": 0,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": -1,
+            "OomKillDisable": false,
+            "PidsLimit": 0,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0
+        },
+        "GraphDriver": {
+            "Name": "aufs",
+            "Data": null
+        },
+        "Mounts": [],
+        "Config": {
+            "Hostname": "ad4f44160a5c",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": true,
+            "AttachStdout": true,
+            "AttachStderr": true,
+            "ExposedPorts": {
+                "80/tcp": {}
+            },
+            "Tty": true,
+            "OpenStdin": true,
+            "StdinOnce": true,
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            ],
+            "Cmd": [
+                "/bin/bash"
+            ],
+            "Image": "ubuntu:14.04",
+            "Volumes": null,
+            "WorkingDir": "",
+            "Entrypoint": null,
+            "OnBuild": null,
+            "Labels": {}
+        },
+        "NetworkSettings": {
+            "Bridge": "",
+            "SandboxID": "b7d1a54192b747c847118db1569a2a2ca9c08aa44c0cbfbd65d9337c32c4dd2d",
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "Ports": null,
+            "SandboxKey": "/var/run/docker/netns/b7d1a54192b7",
+            "SecondaryIPAddresses": null,
+            "SecondaryIPv6Addresses": null,
+            "EndpointID": "",
+            "Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "MacAddress": "",
+            "Networks": {
+                "bridge": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "NetworkID": "ce597cbcac5f49e76d9d4438d4faf572bc60bc235f5a71d125605503bd519430",
+                    "EndpointID": "",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "MacAddress": ""
+                }
+            }
+        }
+    }
+]
+
+docker logs :
+_____________
+docker logs WebServer
+root@ad4f44160a5c:/# sudo apt-get -y update
+Ign http://archive.ubuntu.com trusty InRelease
+Get:1 http://archive.ubuntu.com trusty-updates InRelease [65.9 kB]
+Get:2 http://archive.ubuntu.com trusty-security InRelease [65.9 kB]
+Get:3 http://archive.ubuntu.com trusty Release.gpg [933 B]
+Get:4 http://archive.ubuntu.com trusty Release [58.5 kB]        
+Get:5 http://archive.ubuntu.com trusty-updates/main Sources [478 kB]
+Get:6 http://archive.ubuntu.com trusty-updates/restricted Sources [5921 B]     
+Get:7 http://archive.ubuntu.com trusty-updates/universe Sources [214 kB]       
+Get:8 http://archive.ubuntu.com trusty-updates/main amd64 Packages [1149 kB]   
+Get:9 http://archive.ubuntu.com trusty-updates/restricted amd64 Packages [20.4 kB]
+Get:10 http://archive.ubuntu.com trusty-updates/universe amd64 Packages [503 kB]
+Get:11 http://archive.ubuntu.com trusty-security/main Sources [157 kB]         
+Get:12 http://archive.ubuntu.com trusty-security/restricted Sources [4621 B]   
+Get:13 http://archive.ubuntu.com trusty-security/universe Sources [54.0 kB]    
+Get:14 http://archive.ubuntu.com trusty-security/main amd64 Packages [690 kB]  
+Get:15 http://archive.ubuntu.com trusty-security/restricted amd64 Packages [17.0 kB]
+Get:16 http://archive.ubuntu.com trusty-security/universe amd64 Packages [189 kB]
+Get:17 http://archive.ubuntu.com trusty/main Sources [1335 kB]                 
+Get:18 http://archive.ubuntu.com trusty/restricted Sources [5335 B]            
+Get:19 http://archive.ubuntu.com trusty/universe Sources [7926 kB]             
+Get:20 http://archive.ubuntu.com trusty/main amd64 Packages [1743 kB]          
+Get:21 http://archive.ubuntu.com trusty/restricted amd64 Packages [16.0 kB]    
+Get:22 http://archive.ubuntu.com trusty/universe amd64 Packages [7589 kB]      
+Fetched 22.3 MB in 1min 1s (361 kB/s)
+Reading package lists... Done
+root@ad4f44160a5c:/# sudo apt-get install apache2
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following extra packages will be installed:
+  apache2-bin apache2-data libapr1 libaprutil1 libaprutil1-dbd-sqlite3
+  libaprutil1-ldap libasn1-8-heimdal libgssapi3-heimdal libhcrypto4-heimdal
+  libheimbase1-heimdal libheimntlm0-heimdal libhx509-5-heimdal
+  libkrb5-26-heimdal libldap-2.4-2 libroken18-heimdal libsasl2-2
+  libsasl2-modules libsasl2-modules-db libwind0-heimdal libxml2 openssl
+  sgml-base ssl-cert xml-core
+Suggested packages:
+  www-browser apache2-doc apache2-suexec-pristine apache2-suexec-custom ufw
+  apache2-utils libsasl2-modules-otp libsasl2-modules-ldap
+  libsasl2-modules-sql libsasl2-modules-gssapi-mit
+  libsasl2-modules-gssapi-heimdal ca-certificates sgml-base-doc
+  openssl-blacklist debhelper
+The following NEW packages will be installed:
+  apache2 apache2-bin apache2-data libapr1 libaprutil1 libaprutil1-dbd-sqlite3
+  libaprutil1-ldap libasn1-8-heimdal libgssapi3-heimdal libhcrypto4-heimdal
+  libheimbase1-heimdal libheimntlm0-heimdal libhx509-5-heimdal
+  libkrb5-26-heimdal libldap-2.4-2 libroken18-heimdal libsasl2-2
+  libsasl2-modules libsasl2-modules-db libwind0-heimdal libxml2 openssl
+  sgml-base ssl-cert xml-core
+0 upgraded, 25 newly installed, 0 to remove and 9 not upgraded.
+Need to get 3437 kB of archives.
+After this operation, 12.6 MB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Get:1 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libroken18-heimdal amd64 1.6~git20131207+dfsg-1ubuntu1.1 [40.0 kB]
+Get:2 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libasn1-8-heimdal amd64 1.6~git20131207+dfsg-1ubuntu1.1 [161 kB]
+Get:3 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libhcrypto4-heimdal amd64 1.6~git20131207+dfsg-1ubuntu1.1 [83.9 kB]
+Get:4 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libheimbase1-heimdal amd64 1.6~git20131207+dfsg-1ubuntu1.1 [28.9 kB]
+Get:5 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libwind0-heimdal amd64 1.6~git20131207+dfsg-1ubuntu1.1 [47.8 kB]
+Get:6 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libhx509-5-heimdal amd64 1.6~git20131207+dfsg-1ubuntu1.1 [104 kB]
+Get:7 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libkrb5-26-heimdal amd64 1.6~git20131207+dfsg-1ubuntu1.1 [196 kB]
+Get:8 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libheimntlm0-heimdal amd64 1.6~git20131207+dfsg-1ubuntu1.1 [15.2 kB]
+Get:9 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libgssapi3-heimdal amd64 1.6~git20131207+dfsg-1ubuntu1.1 [89.8 kB]
+Get:10 http://archive.ubuntu.com/ubuntu/ trusty/main libsasl2-modules-db amd64 2.1.25.dfsg1-17build1 [14.9 kB]
+Get:11 http://archive.ubuntu.com/ubuntu/ trusty/main libsasl2-2 amd64 2.1.25.dfsg1-17build1 [56.5 kB]
+Get:12 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libldap-2.4-2 amd64 2.4.31-1+nmu2ubuntu8.3 [153 kB]
+Get:13 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libxml2 amd64 2.9.1+dfsg1-3ubuntu4.8 [573 kB]
+Get:14 http://archive.ubuntu.com/ubuntu/ trusty/main sgml-base all 1.26+nmu4ubuntu1 [12.5 kB]
+Get:15 http://archive.ubuntu.com/ubuntu/ trusty/main libapr1 amd64 1.5.0-1 [85.1 kB]
+Get:16 http://archive.ubuntu.com/ubuntu/ trusty/main libaprutil1 amd64 1.5.3-1 [76.4 kB]
+Get:17 http://archive.ubuntu.com/ubuntu/ trusty/main libsasl2-modules amd64 2.1.25.dfsg1-17build1 [64.3 kB]
+Get:18 http://archive.ubuntu.com/ubuntu/ trusty-updates/main openssl amd64 1.0.1f-1ubuntu2.21 [489 kB]
+Get:19 http://archive.ubuntu.com/ubuntu/ trusty/main xml-core all 0.13+nmu2 [23.3 kB]
+Get:20 http://archive.ubuntu.com/ubuntu/ trusty/main libaprutil1-dbd-sqlite3 amd64 1.5.3-1 [10.5 kB]
+Get:21 http://archive.ubuntu.com/ubuntu/ trusty/main libaprutil1-ldap amd64 1.5.3-1 [8634 B]
+Get:22 http://archive.ubuntu.com/ubuntu/ trusty-updates/main apache2-bin amd64 2.4.7-1ubuntu4.13 [839 kB]
+Get:23 http://archive.ubuntu.com/ubuntu/ trusty-updates/main apache2-data all 2.4.7-1ubuntu4.13 [160 kB]
+Get:24 http://archive.ubuntu.com/ubuntu/ trusty-updates/main apache2 amd64 2.4.7-1ubuntu4.13 [87.4 kB]
+Get:25 http://archive.ubuntu.com/ubuntu/ trusty/main ssl-cert all 1.0.33 [16.6 kB]
+Fetched 3437 kB in 17s (192 kB/s)                                              
+Preconfiguring packages ...
+Selecting previously unselected package libroken18-heimdal:amd64.
+(Reading database ... 11561 files and directories currently installed.)
+Preparing to unpack .../libroken18-heimdal_1.6~git20131207+dfsg-1ubuntu1.1_amd64.deb ...
+Unpacking libroken18-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Selecting previously unselected package libasn1-8-heimdal:amd64.
+Preparing to unpack .../libasn1-8-heimdal_1.6~git20131207+dfsg-1ubuntu1.1_amd64.deb ...
+Unpacking libasn1-8-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Selecting previously unselected package libhcrypto4-heimdal:amd64.
+Preparing to unpack .../libhcrypto4-heimdal_1.6~git20131207+dfsg-1ubuntu1.1_amd64.deb ...
+Unpacking libhcrypto4-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Selecting previously unselected package libheimbase1-heimdal:amd64.
+Preparing to unpack .../libheimbase1-heimdal_1.6~git20131207+dfsg-1ubuntu1.1_amd64.deb ...
+Unpacking libheimbase1-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Selecting previously unselected package libwind0-heimdal:amd64.
+Preparing to unpack .../libwind0-heimdal_1.6~git20131207+dfsg-1ubuntu1.1_amd64.deb ...
+Unpacking libwind0-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Selecting previously unselected package libhx509-5-heimdal:amd64.
+Preparing to unpack .../libhx509-5-heimdal_1.6~git20131207+dfsg-1ubuntu1.1_amd64.deb ...
+Unpacking libhx509-5-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Selecting previously unselected package libkrb5-26-heimdal:amd64.
+Preparing to unpack .../libkrb5-26-heimdal_1.6~git20131207+dfsg-1ubuntu1.1_amd64.deb ...
+Unpacking libkrb5-26-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Selecting previously unselected package libheimntlm0-heimdal:amd64.
+Preparing to unpack .../libheimntlm0-heimdal_1.6~git20131207+dfsg-1ubuntu1.1_amd64.deb ...
+Unpacking libheimntlm0-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Selecting previously unselected package libgssapi3-heimdal:amd64.
+Preparing to unpack .../libgssapi3-heimdal_1.6~git20131207+dfsg-1ubuntu1.1_amd64.deb ...
+Unpacking libgssapi3-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Selecting previously unselected package libsasl2-modules-db:amd64.
+Preparing to unpack .../libsasl2-modules-db_2.1.25.dfsg1-17build1_amd64.deb ...
+Unpacking libsasl2-modules-db:amd64 (2.1.25.dfsg1-17build1) ...
+Selecting previously unselected package libsasl2-2:amd64.
+Preparing to unpack .../libsasl2-2_2.1.25.dfsg1-17build1_amd64.deb ...
+Unpacking libsasl2-2:amd64 (2.1.25.dfsg1-17build1) ...
+Selecting previously unselected package libldap-2.4-2:amd64.
+Preparing to unpack .../libldap-2.4-2_2.4.31-1+nmu2ubuntu8.3_amd64.deb ...
+Unpacking libldap-2.4-2:amd64 (2.4.31-1+nmu2ubuntu8.3) ...
+Selecting previously unselected package libxml2:amd64.
+Preparing to unpack .../libxml2_2.9.1+dfsg1-3ubuntu4.8_amd64.deb ...
+Unpacking libxml2:amd64 (2.9.1+dfsg1-3ubuntu4.8) ...
+Selecting previously unselected package sgml-base.
+Preparing to unpack .../sgml-base_1.26+nmu4ubuntu1_all.deb ...
+Unpacking sgml-base (1.26+nmu4ubuntu1) ...
+Selecting previously unselected package libapr1:amd64.
+Preparing to unpack .../libapr1_1.5.0-1_amd64.deb ...
+Unpacking libapr1:amd64 (1.5.0-1) ...
+Selecting previously unselected package libaprutil1:amd64.
+Preparing to unpack .../libaprutil1_1.5.3-1_amd64.deb ...
+Unpacking libaprutil1:amd64 (1.5.3-1) ...
+Selecting previously unselected package libsasl2-modules:amd64.
+Preparing to unpack .../libsasl2-modules_2.1.25.dfsg1-17build1_amd64.deb ...
+Unpacking libsasl2-modules:amd64 (2.1.25.dfsg1-17build1) ...
+Selecting previously unselected package openssl.
+Preparing to unpack .../openssl_1.0.1f-1ubuntu2.21_amd64.deb ...
+Unpacking openssl (1.0.1f-1ubuntu2.21) ...
+Selecting previously unselected package xml-core.
+Preparing to unpack .../xml-core_0.13+nmu2_all.deb ...
+Unpacking xml-core (0.13+nmu2) ...
+Selecting previously unselected package libaprutil1-dbd-sqlite3:amd64.
+Preparing to unpack .../libaprutil1-dbd-sqlite3_1.5.3-1_amd64.deb ...
+Unpacking libaprutil1-dbd-sqlite3:amd64 (1.5.3-1) ...
+Selecting previously unselected package libaprutil1-ldap:amd64.
+Preparing to unpack .../libaprutil1-ldap_1.5.3-1_amd64.deb ...
+Unpacking libaprutil1-ldap:amd64 (1.5.3-1) ...
+Selecting previously unselected package apache2-bin.
+Preparing to unpack .../apache2-bin_2.4.7-1ubuntu4.13_amd64.deb ...
+Unpacking apache2-bin (2.4.7-1ubuntu4.13) ...
+Selecting previously unselected package apache2-data.
+Preparing to unpack .../apache2-data_2.4.7-1ubuntu4.13_all.deb ...
+Unpacking apache2-data (2.4.7-1ubuntu4.13) ...
+Selecting previously unselected package apache2.
+Preparing to unpack .../apache2_2.4.7-1ubuntu4.13_amd64.deb ...
+Unpacking apache2 (2.4.7-1ubuntu4.13) ...
+Selecting previously unselected package ssl-cert.
+Preparing to unpack .../ssl-cert_1.0.33_all.deb ...
+Unpacking ssl-cert (1.0.33) ...
+Processing triggers for ureadahead (0.100.0-16) ...
+Setting up libroken18-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Setting up libasn1-8-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Setting up libhcrypto4-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Setting up libheimbase1-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Setting up libwind0-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Setting up libhx509-5-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Setting up libkrb5-26-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Setting up libheimntlm0-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Setting up libgssapi3-heimdal:amd64 (1.6~git20131207+dfsg-1ubuntu1.1) ...
+Setting up libsasl2-modules-db:amd64 (2.1.25.dfsg1-17build1) ...
+Setting up libsasl2-2:amd64 (2.1.25.dfsg1-17build1) ...
+Setting up libldap-2.4-2:amd64 (2.4.31-1+nmu2ubuntu8.3) ...
+Setting up libxml2:amd64 (2.9.1+dfsg1-3ubuntu4.8) ...
+Setting up sgml-base (1.26+nmu4ubuntu1) ...
+Setting up libapr1:amd64 (1.5.0-1) ...
+Setting up libaprutil1:amd64 (1.5.3-1) ...
+Setting up libsasl2-modules:amd64 (2.1.25.dfsg1-17build1) ...
+Setting up openssl (1.0.1f-1ubuntu2.21) ...
+Setting up xml-core (0.13+nmu2) ...
+Setting up libaprutil1-dbd-sqlite3:amd64 (1.5.3-1) ...
+Setting up libaprutil1-ldap:amd64 (1.5.3-1) ...
+Setting up apache2-bin (2.4.7-1ubuntu4.13) ...
+Setting up apache2-data (2.4.7-1ubuntu4.13) ...
+Setting up apache2 (2.4.7-1ubuntu4.13) ...
+Enabling module mpm_event.
+Enabling module authz_core.
+Enabling module authz_host.
+Enabling module authn_core.
+Enabling module auth_basic.
+Enabling module access_compat.
+Enabling module authn_file.
+Enabling module authz_user.
+Enabling module alias.
+Enabling module dir.
+Enabling module autoindex.
+Enabling module env.
+Enabling module mime.
+Enabling module negotiation.
+Enabling module setenvif.
+Enabling module filter.
+Enabling module deflate.
+Enabling module status.
+Enabling conf charset.
+Enabling conf localized-error-pages.
+Enabling conf other-vhosts-access-log.
+Enabling conf security.
+Enabling conf serve-cgi-bin.
+Enabling site 000-default.
+invoke-rc.d: policy-rc.d denied execution of start.
+Setting up ssl-cert (1.0.33) ...
+Processing triggers for libc-bin (2.19-0ubuntu6.9) ...
+Processing triggers for sgml-base (1.26+nmu4ubuntu1) ...
+Processing triggers for ureadahead (0.100.0-16) ...
+root@ad4f44160a5c:/# sudo service apache2 start
+ * Starting web server apache2                                                                                                                                            AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.17.0.2. Set the 'ServerName' directive globally to suppress this message
+ * 
+root@ad4f44160a5c:/# vim /etc/hosts
+bash: vim: command not found
+root@ad4f44160a5c:/# sudo apt-get install vim
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following extra packages will be installed:
+  libgpm2 libpython2.7 libpython2.7-minimal libpython2.7-stdlib vim-common
+  vim-runtime vim-tiny
+Suggested packages:
+  gpm ctags vim-doc vim-scripts indent
+The following NEW packages will be installed:
+  libgpm2 libpython2.7 libpython2.7-minimal libpython2.7-stdlib vim
+  vim-runtime
+The following packages will be upgraded:
+  vim-common vim-tiny
+2 upgraded, 6 newly installed, 0 to remove and 7 not upgraded.
+Need to get 9560 kB of archives.
+After this operation, 42.9 MB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Get:1 http://archive.ubuntu.com/ubuntu/ trusty/main libgpm2 amd64 1.20.4-6.1 [16.5 kB]
+Get:2 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libpython2.7-minimal amd64 2.7.6-8ubuntu0.3 [307 kB]
+Get:3 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libpython2.7-stdlib amd64 2.7.6-8ubuntu0.3 [1873 kB]
+Get:4 http://archive.ubuntu.com/ubuntu/ trusty-updates/main libpython2.7 amd64 2.7.6-8ubuntu0.3 [1039 kB]
+Get:5 http://archive.ubuntu.com/ubuntu/ trusty-updates/main vim-tiny amd64 2:7.4.052-1ubuntu3.1 [391 kB]
+Get:6 http://archive.ubuntu.com/ubuntu/ trusty-updates/main vim-common amd64 2:7.4.052-1ubuntu3.1 [95.2 kB]
+Get:7 http://archive.ubuntu.com/ubuntu/ trusty-updates/main vim-runtime all 2:7.4.052-1ubuntu3.1 [4882 kB]
+Get:8 http://archive.ubuntu.com/ubuntu/ trusty-updates/main vim amd64 2:7.4.052-1ubuntu3.1 [955 kB]
+Fetched 9560 kB in 56s (170 kB/s)                                              
+Selecting previously unselected package libgpm2:amd64.
+(Reading database ... 12478 files and directories currently installed.)
+Preparing to unpack .../libgpm2_1.20.4-6.1_amd64.deb ...
+Unpacking libgpm2:amd64 (1.20.4-6.1) ...
+Selecting previously unselected package libpython2.7-minimal:amd64.
+Preparing to unpack .../libpython2.7-minimal_2.7.6-8ubuntu0.3_amd64.deb ...
+Unpacking libpython2.7-minimal:amd64 (2.7.6-8ubuntu0.3) ...
+Selecting previously unselected package libpython2.7-stdlib:amd64.
+Preparing to unpack .../libpython2.7-stdlib_2.7.6-8ubuntu0.3_amd64.deb ...
+Unpacking libpython2.7-stdlib:amd64 (2.7.6-8ubuntu0.3) ...
+Selecting previously unselected package libpython2.7:amd64.
+Preparing to unpack .../libpython2.7_2.7.6-8ubuntu0.3_amd64.deb ...
+Unpacking libpython2.7:amd64 (2.7.6-8ubuntu0.3) ...
+Preparing to unpack .../vim-tiny_2%3a7.4.052-1ubuntu3.1_amd64.deb ...
+Unpacking vim-tiny (2:7.4.052-1ubuntu3.1) over (2:7.4.052-1ubuntu3) ...
+Preparing to unpack .../vim-common_2%3a7.4.052-1ubuntu3.1_amd64.deb ...
+Unpacking vim-common (2:7.4.052-1ubuntu3.1) over (2:7.4.052-1ubuntu3) ...
+Selecting previously unselected package vim-runtime.
+Preparing to unpack .../vim-runtime_2%3a7.4.052-1ubuntu3.1_all.deb ...
+Adding 'diversion of /usr/share/vim/vim74/doc/help.txt to /usr/share/vim/vim74/doc/help.txt.vim-tiny by vim-runtime'
+Adding 'diversion of /usr/share/vim/vim74/doc/tags to /usr/share/vim/vim74/doc/tags.vim-tiny by vim-runtime'
+Unpacking vim-runtime (2:7.4.052-1ubuntu3.1) ...
+Selecting previously unselected package vim.
+Preparing to unpack .../vim_2%3a7.4.052-1ubuntu3.1_amd64.deb ...
+Unpacking vim (2:7.4.052-1ubuntu3.1) ...
+Processing triggers for mime-support (3.54ubuntu1.1) ...
+Setting up libgpm2:amd64 (1.20.4-6.1) ...
+Setting up libpython2.7-minimal:amd64 (2.7.6-8ubuntu0.3) ...
+Setting up libpython2.7-stdlib:amd64 (2.7.6-8ubuntu0.3) ...
+Setting up libpython2.7:amd64 (2.7.6-8ubuntu0.3) ...
+Setting up vim-common (2:7.4.052-1ubuntu3.1) ...
+Setting up vim-tiny (2:7.4.052-1ubuntu3.1) ...
+Setting up vim-runtime (2:7.4.052-1ubuntu3.1) ...
+Processing /usr/share/vim/addons/doc
+Setting up vim (2:7.4.052-1ubuntu3.1) ...
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/vim (vim) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/vimdiff (vimdiff) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/rvim (rvim) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/rview (rview) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/vi (vi) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/view (view) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/ex (ex) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/editor (editor) in auto mode
+Processing triggers for libc-bin (2.19-0ubuntu6.9) ...
+root@ad4f44160a5c:/# vim /etc/hosts
+root@ad4f44160a5c:/# hostname
+ad4f44160a5c
+root@ad4f44160a5c:/# exit
+exit
+
+
+network create :
+________________
+
+docker network create -d bridge my-bridge-network
+74a24f325a64ea5cbe8e2c7b0109f7eb0bfb2dff14723f38809ddcf3fa5484d7
+
+network ls :
+____________
+
+docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+ce597cbcac5f        bridge              bridge              local               
+6186065c8d88        host                host                local               
+74a24f325a64        my-bridge-network   bridge              local               
+2c4f8be6bc21        none                null                local       
+
+network create :
+________________
+docker network connect my-bridge-network 116c7aa6ac9a
+
+network inspect :
+_________________________            
+docker network inspect my-bridge-network
+[
+    {
+        "Name": "my-bridge-network",
+        "Id": "74a24f325a64ea5cbe8e2c7b0109f7eb0bfb2dff14723f38809ddcf3fa5484d7",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": {},
+            "Config": [
+                {
+                    "Subnet": "172.18.0.0/16",
+                    "Gateway": "172.18.0.1/16"
+                }
+            ]
+        },
+        "Internal": false,
+        "Containers": {
+            "116c7aa6ac9aa22489c6fcb6609c11537f387c107e903f3e714a161f871b607d": {
+                "Name": "infallible_ritchie",
+                "EndpointID": "273c5dccbaa5ba0eca017ba2be4ce90989f43c4d655517ad260dfeb78c08a3bc",
+                "MacAddress": "02:42:ac:12:00:02",
+                "IPv4Address": "172.18.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {},
+        "Labels": {}
+    }
+]
+
+docker search :
+_______________
+docker search hello-world
+NAME                                      DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED
+hello-world                               Hello World! (an example of minimal Docker...   207       [OK]       
+tutum/hello-world                         Image to test docker deployments. Has Apac...   28                   [OK]
+dockercloud/hello-world                   Hello World!                                    9                    [OK]
+marcells/aspnet-hello-world               ASP.NET vNext - Hello World                     4                    [OK]
+
+docker top :
+____________
+docker top 116c7aa6ac9a
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+root                5496                5478                0                   18:38               pts/2               00:00:00            /bin/bash
+root                5638                5496                0                   18:55               pts/2               00:00:00            sleep 1000
+
+docker update :
+_______________
+docker update --cpu-shares 512 -m 300M 116c7aa6ac9a
+116c7aa6ac9a
+
+docker volume create :
+_____________________
+docker volume create --name hello
+hello
+
+docker volume inspect :
+_______________________
+ docker volume inspect hello
+[
+    {
+        "Name": "hello",
+        "Driver": "local",
+        "Mountpoint": "/var/lib/docker/volumes/hello/_data",
+        "Labels": {},
+        "Scope": "local"
+    }
+]
+
+volume ls :
+___________
+docker volume ls
+DRIVER              VOLUME NAME
+local               hello
+
+docker events :
+______________
+docker events
+2016-11-29T19:18:18.418165027+05:30 container resize 116c7aa6ac9aa22489c6fcb6609c11537f387c107e903f3e714a161f871b607d (height=41, image=web-server, name=infallible_ritchie, width=170)
+2016-11-29T19:18:18.436000757+05:30 container resize 116c7aa6ac9aa22489c6fcb6609c11537f387c107e903f3e714a161f871b607d (height=41, image=web-server, name=infallible_ritchie, width=170)
+2016-11-29T19:18:20.580318999+05:30 container resize 116c7aa6ac9aa22489c6fcb6609c11537f387c107e903f3e714a161f871b607d (height=42, image=web-server, name=infallible_ritchie, width=170)
+2016-11-29T19:18:20.581818382+05:30 container resize 116c7aa6ac9aa22489c6fcb6609c11537f387c107e903f3e714a161f871b607d (height=42, image=web-server, name=infallible_ritchie, width=170)
+2016-11-29T19:18:23.694184105+05:30 container resize 116c7aa6ac9aa22489c6fcb6609c11537f387c107e903f3e714a161f871b607d (height=41, image=web-server, name=infallible_ritchie, width=170)
+2016-11-29T19:18:23.729471687+05:30 container resize 116c7aa6ac9aa22489c6fcb6609c11537f387c107e903f3e714a161f871b607d (height=41, image=web-server, name=infallible_ritchie, width=170)
+2016-11-29T19:18:25.339340822+05:30 container resize 116c7aa6ac9aa22489c6fcb6609c11537f387c107e903f3e714a161f871b607d (height=42, image=web-server, name=infallible_ritchie, width=170)
+2016-11-29T19:18:25.401938416+05:30 container resize 116c7aa6ac9aa22489c6fcb6609c11537f387c107e903f3e714a161f871b607d (height=42, image=web-server, name=infallible_ritchie, width=170)
+
+
+
+

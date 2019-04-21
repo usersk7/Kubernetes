@@ -1,0 +1,442 @@
+namespaces :
+   provide isolation of process, h/w resources, etc. 
+
+cgroup : cpugroup --/sys/fs
+   controller for resources
+   implemeted through kernel modules
+   every os has inbuilt cgroup
+   it has diff. hierarchy of subsystem: subsytem for memory, block storage, cpu, etc.
+   system process - task
+   perform association of a set of task to set of subsystem
+   imp subsyetm - freezer: used for migration of container: hold the current state of container and migrate and restart it
+   
+Docker - high level language for cgroups and kernel modules.
+
+
+creation of cgroup for memory: restrtict memory to 100
+
+mkdir /sys/fs/cgroup/memory/demo
+cd <directory>
+-- by default all control files are generated
+
+echo "100000000" > /sys/fs/cgroup/memory/demo/memory.limit_in_bytes --100 mb
+ 
+echo "0" > /sys/fs/cgroup/memory/demo/memory.swappiness  -- restrict swap to be used in case of specific limit is defined
+
+cat /sys/fs/cgroup/memory/demo/tasks -- list current process
+
+echo $$ > /sys/fs/cgroup/memory/demo/tasks -- to execute current working process with new cgroup setting, add current process to demo task
+
+demo.py: 
+________________________________________________________________________
+
+f = open("/dev/urandom", "r")
+data = ""
+print "**********************************************************"
+print " Below program shows the use of memory cGroup sub system**"
+print "**********************************************************"
+i=0
+while True:
+   data += f.read(10000000) # 10mb
+   i += 1
+   print "%d MB of memory is utilized" % (i*10,)
+__________________________________________________________________________
+
+check new cgroup memory limit by running python demo.py:
+it gets killed at 80 mb when memory limit to 100 mb:
+**********************************************************
+ Below program shows the use of memory cGroup sub system**
+**********************************************************
+10 MB of memory is utilized
+20 MB of memory is utilized
+30 MB of memory is utilized
+40 MB of memory is utilized
+50 MB of memory is utilized
+60 MB of memory is utilized
+70 MB of memory is utilized
+80 MB of memory is utilized
+Killed
+
+Removal of cgroup:
+________________________________________________________________________
+
+sudo rmdir /sys/fs/cgroup/memory/demo/ -- use rmdir not rm -rf: cgroup system call does not allow rm command to perform deletion
+                                          don't remove from root as it is using current process.
+										  so exit and use sudo with above command
+
+										  
+container Filesystem:
+________________________________________________________________________
+
+wget https://github.com/ericchiang/containers-from-scratch/releases/download/v0.1.0/rootfs.tar.gz
+sha256sum rootfs.tar.gz
+sudo tar -zxf rootfs.tar.gz
+
+Login to container filesystem:
+________________________________________________________________________
+chroot is used for login to container filesystem
+
+sudo chroot rootfs /bin/bash
+
+ubuntu@kubegroup21:~$ sudo chroot rootfs /bin/bash
+root@kubegroup21:/# ls /
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+
+
+difference with actual host fs:
+
+ubuntu@kubegroup21:~$ ls /
+bin  boot  dev  etc  home  initrd.img  lib  lib64  lost+found  media  mnt  opt  proc  root  run  sbin  snap  srv  sys  tmp  usr  var  vmlinuz
+
+
+use exit to come out of container filesystem.
+
+
+** container is basically a tar ball containing FS.
+
+
+
+
+
+Namespace:
+________________________________________________________________________
+
+provide restricted view of processes.
+
+multiple implementation of namespace:
+ unshare() -- create ns and attaches current process to ns.
+ clone() -- create ns and process and attach process to ns.
+ setns() -- joining an existing ns to existing process.
+ 
+ 
+proc - filesystem which mangae processes
+
+processes running running in container are isolated from host process.
+we can kill host process from container also.
+
+create namespace:  sudo unshare -p -f --mount-proc=$PWD/rootfs/proc chroot rootfs /bin/bash
+
+after creating namespace we can not kill host process from container process.
+
+
+** check what our created namespace contains on host vm:
+ubuntu@kubegroup21:~$ ps -ef | grep -i unshare
+root     28101 23291  0 10:01 pts/0    00:00:00 sudo unshare -p -f --mount-proc=/home/ubuntu/rootfs/proc chroot rootfs /bin/bash
+root     28102 28101  0 10:01 pts/0    00:00:00 unshare -p -f --mount-proc=/home/ubuntu/rootfs/proc chroot rootfs /bin/bash
+ubuntu   28394 27500  0 10:05 pts/2    00:00:00 grep --color=auto -i unshare
+ubuntu@kubegroup21:~$ cd /proc/2321
+-bash: cd: /proc/2321: No such file or directory
+ubuntu@kubegroup21:~$ cd /proc/28101
+ubuntu@kubegroup21:/proc/28101$ ls
+ubuntu@kubegroup21:/proc/28101$ cd ns
+ubuntu@kubegroup21:/proc/28101/ns$ ls
+ls: cannot open directory '.': Permission denied
+ubuntu@kubegroup21:/proc/28101/ns$ sudo su
+[sudo] password for ubuntu:
+Sorry, try again.
+[sudo] password for ubuntu:
+root@kubegroup21:/proc/28101/ns# ls
+cgroup  ipc  mnt  net  pid  user  uts
+root@kubegroup21:/proc/28101/ns# ls -l
+total 0
+lrwxrwxrwx 1 root root 0 Oct 27 10:08 cgroup -> cgroup:[4026531835]
+lrwxrwxrwx 1 root root 0 Oct 27 10:08 ipc -> ipc:[4026531839]
+lrwxrwxrwx 1 root root 0 Oct 27 10:08 mnt -> mnt:[4026531840]
+lrwxrwxrwx 1 root root 0 Oct 27 10:08 net -> net:[4026531957]
+lrwxrwxrwx 1 root root 0 Oct 27 10:08 pid -> pid:[4026531836]
+lrwxrwxrwx 1 root root 0 Oct 27 10:08 user -> user:[4026531837]
+lrwxrwxrwx 1 root root 0 Oct 27 10:08 uts -> uts:[4026531838]
+
+Reference Link: Link can be referred for more detail on container creation https://ericchiang.github.io/post/containers-from-scratch/
+             https://success.docker.com/article/introduction-to-user-namespaces-in-docker-engine
+
+** script -a trainig.txt - to copy everything from terminal to file automatically.
+
+
+Docker basics:
+________________________________________________________________________
+
+
+1.  docker pull python:3.6-alpine
+2. docker images
+3. docker history python:3.-alpine  -- show information about layers of docker image
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+a3184dc36856        2 days ago          /bin/sh -c #(nop)  CMD ["python3"]              0B
+<missing>           2 days ago          /bin/sh -c set -ex;   wget -O get-pip.py 'ht…   5.92MB
+<missing>           2 days ago          /bin/sh -c #(nop)  ENV PYTHON_PIP_VERSION=18…   0B
+<missing>           2 days ago          /bin/sh -c cd /usr/local/bin  && ln -s idle3…   32B
+<missing>           2 days ago          /bin/sh -c set -ex  && apk add --no-cache --…   63.4MB
+<missing>           2 days ago          /bin/sh -c #(nop)  ENV PYTHON_VERSION=3.6.7     0B
+<missing>           6 weeks ago         /bin/sh -c #(nop)  ENV GPG_KEY=0D96DF4D4110E…   0B
+<missing>           6 weeks ago         /bin/sh -c apk add --no-cache ca-certificates   556kB
+<missing>           6 weeks ago         /bin/sh -c #(nop)  ENV LANG=C.UTF-8             0B
+<missing>           6 weeks ago         /bin/sh -c #(nop)  ENV PATH=/usr/local/bin:/…   0B
+<missing>           6 weeks ago         /bin/sh -c #(nop)  CMD ["/bin/sh"]              0B
+<missing>           6 weeks ago         /bin/sh -c #(nop) ADD file:25c10b1d1b41d46a1…   4.41MB
+
+4. docker info
+5. docker inspect <id of image/container> - to know info of any container/image
+
+
+### Checking NS of docker container
+find PID from docker inspect command
+root@kubegroup21:~# ps aux | grep 955
+root       955  0.0  0.0   1592     4 pts/0    Ss+  11:12   0:00 /bin/sh
+root      1278  0.0  0.0  14228   940 pts/3    S+   11:14   0:00 grep --color=auto 955
+root@kubegroup21:~# docker inspect 22f821c5eb3d | grep filesystem
+root@kubegroup21:~# docker inspect 22f821c5eb3d | grep fs
+            "ReadonlyRootfs": false,
+                "/proc/fs",
+root@kubegroup21:~# ll /proc/955/ns
+total 0
+dr-x--x--x 2 root root 0 Oct 27 11:12 ./
+dr-xr-xr-x 9 root root 0 Oct 27 11:12 ../
+lrwxrwxrwx 1 root root 0 Oct 27 11:18 cgroup -> cgroup:[4026531835]
+lrwxrwxrwx 1 root root 0 Oct 27 11:18 ipc -> ipc:[4026532459]
+lrwxrwxrwx 1 root root 0 Oct 27 11:18 mnt -> mnt:[4026532457]
+lrwxrwxrwx 1 root root 0 Oct 27 11:12 net -> net:[4026532462]
+lrwxrwxrwx 1 root root 0 Oct 27 11:18 pid -> pid:[4026532460]
+lrwxrwxrwx 1 root root 0 Oct 27 11:18 user -> user:[4026531837]
+lrwxrwxrwx 1 root root 0 Oct 27 11:18 uts -> uts:[4026532458]
+
+exit  from container: : run this command from host : kill -9 955<PID of container process>
+
+with -t : container remains alive even if no main process is running inside container:  docker run -dt python:3.6-alpine
+
+Linking of containers through PID : docker run -dt --pid container:test python:3.6-alpine
+both share same NS and we can control process of one conatiner from another.
+they dont share filesystem with each other
+
+
+nsenter : It is kernel implementation. allow to login conatiner with pid without exec:
+nsenter --target 2113 --mount --uts --ipc --net --pid /bin/sh
+
+mount,uts,net,ipc are namespaces
+
+
+Kubernetes
+_______________________________________________________________
+
+for k8s, we can use any docker engine which upports format of docker images, it is not restricted to one docker engine.
+
+pod is same as container in docker.
+
+kubelet runs on all nodes which gets attached to master and allows to interact nodes with master
+
+kubedns 
+kubeproxy 
+
+kubegroup21    10.0.89.154
+kubegroup22    10.0.89.155
+kubegroup23    10.0.89.156
+
+Installation:
+_______________________________________________________________
+
+
+1. For Kubeadm to work, ‘swap’ needs to be disabled
+
+2. kubeadm init --pod-network-cidr=192.180.0.0/16 --apiserver-advertise-address=10.0.89.154 --
+O/P--
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+kubeadm join 10.0.89.154:6443 --token 8pi48e.bv9ldcw3pofeltlc --discovery-token-ca-cert-hash sha256:f747e82b6867c3780df5de516c3508d5107ad22aa2fba9402dd5f790145015ef
+
+3. Run kubeadm join command(mentioned above) on all worker nodes
+
+4. export KUBECONFIG=/etc/kubernetes/admin.conf : run this command on master
+
+5. kubectl get nodes -- check if nodes are added
+
+6. run these commands: 
+   kubectl apply -f ./calico.yaml
+   kubectl apply -f ./rbac-kdd.yaml
+   
+7. kubectl get nodes -- check if nodes are ready
+
+8.  docker build -t shubhamsk7/primary_app:demo ./ -- on master
+
+9. docker push shubhamsk7/primary_app:demo -- on master
+
+10. kubectl get namespaces
+
+11. kubectl describe namespace kube-public
+
+12. kubectl get pods -n kube-system  or we can change admin.conf and add namespace as kube-system and then run only kubectl get pods
+
+13.with labels k8s identify which pod belongs to which object. It is key-value pair. Pod can have multiple labels.Its a logical way for representing groups and filtering.
+
+14. kubectl get namespace -l type=prod_namespace
+
+15. kubectl get namespace -l "type in {prod-namespace, test-namespace}"
+
+16. kubectl get namespace --show-labels
+
+17. annotation - user metadata
+
+18. pods -collection of container objects: all continers use same resources provided by pod and have same Ip address.
+
+19. kubectl create -f primary_app_pod.yaml
+
+20. kubectl apply -f primary_app_pod.yaml
+ kubectl describe pod  sample-pod-1   : 192.180.2.2
+ 
+21. kubectl exec -it sample-pod-1 /bin/sh  -- login to pod  sample-pod-2: 192.180.2.3
+
+*** 
+https://pracucci.com/graceful-shutdown-of-kubernetes-pods.html
+
+Creation of replicas: 
+
+22. create pod.yaml and mention no. of replicas.
+23. kubectl apply -f primary_app_pod.yaml
+24. kubectl get deploy 
+25. kubectl get rs -- replicaset
+26. kubectl delete primary-app-deploy-b96cc7cd5-bvw87(delete one replica)
+
+
+_______________________________________________________________
+
+27. kubctl rollout : kubectl rollout status deployment.v1.apps/primary-app-deploy
+kubectl scale : kubectl scale --replicas=10 deploy/primary-app-deploy
+
+28. kubectl get pods --show-labels
+
+29. kubectl rollout history deployment.v1.apps/primary-app-deploy  -- show revisions
+
+30. kubectl rollout undo deployment.v1.apps/primary-app-deploy -- bring back to previous revisions
+
+31. kubectl rollout history deployment.v1.apps/primary-app-deploy --revision=2 
+
+32. kubectl logs sample-pod-2-2
+
+Autoscaling
+_______________________________________________________________
+
+
+Heapster - monitoring tool which monitors resources like cpu, resource usage, etc. it is deprecated use Metric-server instead.
+
+
+Config maps and secrets
+_______________________________________________________________
+
+Config and maps: helps in de-coupling hardcoded values from within pod template
+secrets - works like key value pair but it is not displayed and value is encrypted using base-64
+
+**** Config file and secret file must be created before container creation: kubectl apply -f ./config-example.yaml, kubectl apply -f ./secret-example.yaml
+
+
+
+
+Pod in different namespace:
+_______________________________________________________________
+kubectl apply -f primary_app_pod.yaml
+kubectl get pods -n kube-public 
+kubectl describe pod sample-pod-4 -n kube-public
+kubectl exec -it sample-pod-4 -n kube-public /bin/sh
+
+
+
+
+
+Services:
+_______________________________________________________________
+
+Ip does not changeload balances
+has dns
+load balances to muliplt endpoints
+
+***https://github.com/kubernetes-incubator/external-dns
+
+*** https://medium.com/google-cloud/kubernetes-nodeport-vs-loadbalancer-vs-ingress-when-should-i-use-what-922f010849e0
+
+
+
+ kubectl get svc
+ 
+ 
+Cluster Ip : to access services from within Vm and with each other.
+Nodeport : to access services from outside the vm over the network like from our laptop using VM's IP at particular specified Node port. http://VM_IP:Nodeport/hit
+
+******************************************************
+
+root@kubegroup21:~/HO6-Service/HO6-Service# kubectl exec -it sample-pod-4 -n kube-public /bin/sh
+/opt/AppCode/primary_app # nslookup primary-app-service
+nslookup: can't resolve '(null)': Name does not resolve
+
+nslookup: can't resolve 'primary-app-service': Name does not resolve
+/opt/AppCode/primary_app # nslookup primary-app-service.default
+nslookup: can't resolve '(null)': Name does not resolve
+
+Name:      primary-app-service.default
+Address 1: 10.100.141.170 primary-app-service.default.svc.cluster.local
+
+
+*******************************************************
+
+Ingress
+_______________________________________________________________
+
+passing traffic with help of fqdn instead of IP like load balancer.
+
+
+
+Network Policies
+________________________________________________________________________
+
+https://kubernetes.io/docs/concepts/services-networking/network-policies/
+
+Isolated pods
+Non-isolated pods
+
+
+
+Node Assignment
+_______________________________________________________________ 
+
+Specification of creation of pod on particular node: Node Assignment
+
+
+
+nodeSelector : older approach , deprecated
+
+Affinity and node affinity : current approach
+
+afinity and anti-affinity - specifes where distribution will be done on same node or it will get distributed
+
+
+Taint and toleration
+_______________________________________________________________
+opposite of affinity
+
+
+
+Pod Priority and Preemption
+_______________________________________________________________
+
+we can provide priority to a single pod or set of pods.
+
+*** https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+
+
+
+RBAC - Run based Access Control
+_______________________________________________________________
+
+https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/#writing-a-job-spec
+
+
+DaemonSet
+
+List Service accounts: kubectl get sa -n kube-system
+
+
+separate applications with --- in same yaml file.
